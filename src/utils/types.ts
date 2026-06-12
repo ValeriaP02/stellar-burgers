@@ -38,3 +38,11 @@ export type TUser = {
 };
 
 export type TTabMode = 'bun' | 'sauce' | 'main';
+
+export type TOrderCreateResponse = {
+  order: { number: number };
+};
+
+export type TOrderNumberResponse = {
+  number: number;
+};

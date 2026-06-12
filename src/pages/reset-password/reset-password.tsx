@@ -10,9 +10,10 @@ export const ResetPassword: FC = () => {
   const [token, setToken] = useState('');
   const [error, setError] = useState<Error | null>(null);
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const handleSubmit = (e: SyntheticEvent<Element, Event>) => {
     e.preventDefault();
     setError(null);
+
     resetPasswordApi({ password, token })
       .then(() => {
         localStorage.removeItem('resetPassword');

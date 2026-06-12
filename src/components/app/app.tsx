@@ -1,34 +1,122 @@
-import { ConstructorPage } from '@pages';
-import '../../index.css';
-import styles from './app.module.css';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { AppHeader } from '../app-header/app-header';
+import { ConstructorPage } from '../../pages/constructor-page';
+import { Feed } from '../../pages/feed';
+import { Login } from '../../pages/login';
+import { Register } from '../../pages/register';
+import { ForgotPassword } from '../../pages/forgot-password';
+import { ResetPassword } from '../../pages/reset-password';
+import { Profile } from '../../pages/profile';
+import { ProfileOrders } from '../../pages/profile-orders';
+import { NotFound404 } from '../../pages/not-fount-404';
+import { Modal } from '../modal';
+import { IngredientDetails } from '../ingredient-details';
+import { OrderInfo } from '../order-info';
+import { ProtectedRoute } from '../ProtectedRoute/ProtectedRoute';
+import { useEffect } from 'react';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { useDispatch } from '../../services/store';
 
-import { AppHeader } from '@components';
-import { Preloader } from '@ui';
+function App() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-const App = () => {
-  /** TODO: взять переменные из стора */
-  const isIngredientsLoading = false;
-  const ingredients = [];
-  const error = null;
+  const closeModal = () => navigate(-1);
+
+  useEffect(() => {
+    dispatch(fetchIngredients());
+  }, [dispatch]);
 
   return (
-    <div className={styles.app}>
+    <>
       <AppHeader />
-      {isIngredientsLoading ? (
-        <Preloader />
-      ) : error ? (
-        <div className={`${styles.error} text text_type_main-medium pt-4`}>
-          {error}
-        </div>
-      ) : ingredients.length > 0 ? (
-        <ConstructorPage />
-      ) : (
-        <div className={`${styles.title} text text_type_main-medium pt-4`}>
-          Нет игредиентов
-        </div>
-      )}
-    </div>
+
+      <Routes location={location}>
+        <Route path='/' element={<ConstructorPage />} />
+        <Route path='/feed' element={<Feed />} />
+
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/feed/:number'
+          element={
+            <Modal title='Информация о заказе' onClose={closeModal}>
+              <OrderInfo />
+            </Modal>
+          }
+        />
+        <Route
+          path='/ingredients/:id'
+          element={
+            <Modal title='Детали ингредиента' onClose={closeModal}>
+              <IngredientDetails />
+            </Modal>
+          }
+        />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <Modal title='Информация о заказе' onClose={closeModal}>
+                <OrderInfo />
+              </Modal>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path='*' element={<NotFound404 />} />
+      </Routes>
+    </>
   );
-};
+}
 
 export default App;
