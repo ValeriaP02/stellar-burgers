@@ -1,4 +1,6 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
 import { AppHeader } from '../app-header/app-header';
 import { ConstructorPage } from '../../pages/constructor-page';
 import { Feed } from '../../pages/feed';
@@ -9,20 +11,29 @@ import { ResetPassword } from '../../pages/reset-password';
 import { Profile } from '../../pages/profile';
 import { ProfileOrders } from '../../pages/profile-orders';
 import { NotFound404 } from '../../pages/not-fount-404';
+
 import { Modal } from '../modal';
 import { IngredientDetails } from '../ingredient-details';
 import { OrderInfo } from '../order-info';
 import { ProtectedRoute } from '../ProtectedRoute/ProtectedRoute';
-import { useEffect } from 'react';
-import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+
 import { useDispatch } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const closeModal = () => navigate(-1);
+  const backgroundLocation = location.state?.background;
+
+  const closeModal = () => {
+    if (backgroundLocation) {
+      navigate(backgroundLocation.pathname + backgroundLocation.search);
+    } else {
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchIngredients());
@@ -32,7 +43,7 @@ function App() {
     <>
       <AppHeader />
 
-      <Routes location={location}>
+      <Routes location={backgroundLocation || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
 
@@ -77,6 +88,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path='/profile/orders'
           element={
@@ -86,35 +106,39 @@ function App() {
           }
         />
 
-        <Route
-          path='/feed/:number'
-          element={
-            <Modal title='Информация о заказе' onClose={closeModal}>
-              <OrderInfo />
-            </Modal>
-          }
-        />
-        <Route
-          path='/ingredients/:id'
-          element={
-            <Modal title='Детали ингредиента' onClose={closeModal}>
-              <IngredientDetails />
-            </Modal>
-          }
-        />
-        <Route
-          path='/profile/orders/:number'
-          element={
-            <ProtectedRoute>
+        <Route path='*' element={<NotFound404 />} />
+      </Routes>
+
+      {backgroundLocation && (
+        <Routes>
+          <Route
+            path='/feed/:number'
+            element={
               <Modal title='Информация о заказе' onClose={closeModal}>
                 <OrderInfo />
               </Modal>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path='*' element={<NotFound404 />} />
-      </Routes>
+            }
+          />
+          <Route
+            path='/ingredients/:id'
+            element={
+              <Modal title='Детали ингредиента' onClose={closeModal}>
+                <IngredientDetails />
+              </Modal>
+            }
+          />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <Modal title='Информация о заказе' onClose={closeModal}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      )}
     </>
   );
 }

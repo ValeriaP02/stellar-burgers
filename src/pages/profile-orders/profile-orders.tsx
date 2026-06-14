@@ -15,9 +15,16 @@ export const ProfileOrders: FC = () => {
   );
   const error = useSelector((state: RootState) => state.orders.error);
 
+  const isAuthenticated = useSelector((s: RootState) => s.auth.isAuthenticated);
+  const user = useSelector((s: RootState) => s.auth.user);
+
   useEffect(() => {
-    dispatch(fetchMyOrders());
-  }, [dispatch]);
+    console.log('ProfileOrders auth:', { isAuthenticated, user });
+    if (isAuthenticated && user) {
+      console.log('dispatch fetchMyOrders');
+      dispatch(fetchMyOrders());
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   if (loading) return <Preloader />;
   if (error) return <p>Error: {error}</p>;

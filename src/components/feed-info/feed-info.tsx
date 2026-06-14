@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from '../../services/store';
 
 import { TOrder } from '@utils-types';
 import { FeedInfoUI } from '../ui/feed-info';
-import { fetchFeeds } from '../../services/slices/feedSlice';
+import { fetchFeeds, selectFeedTotals } from '../../services/slices/feedSlice';
 import {
   selectFeedOrders,
   selectFeedLoading
@@ -20,6 +20,7 @@ export const FeedInfo: FC = () => {
 
   const orders = useSelector(selectFeedOrders);
   const loading = useSelector(selectFeedLoading);
+  const { total, totalToday } = useSelector(selectFeedTotals);
 
   useEffect(() => {
     if (!orders.length && !loading) dispatch(fetchFeeds());
@@ -33,7 +34,7 @@ export const FeedInfo: FC = () => {
     <FeedInfoUI
       readyOrders={readyOrders}
       pendingOrders={pendingOrders}
-      feed={{}}
+      feed={{ total, totalToday } as any}
     />
   );
 };

@@ -62,8 +62,9 @@ export const fetchMyOrders = createAsyncThunk<
   { rejectValue: string }
 >('orders/fetchMyAll', async (_, { rejectWithValue }) => {
   try {
-    const orders = await getOrdersApi();
-    return orders;
+    const data: any = await getOrdersApi();
+
+    return data?.orders ?? data;
   } catch (e) {
     return rejectWithValue(
       e instanceof Error ? e.message : 'Ошибка загрузки моих заказов'
@@ -94,12 +95,20 @@ export const fetchOrderById = createAsyncThunk<
   try {
     const data: any = await getOrderByNumberApi(number);
 
-    const order: TOrder | undefined = data?.orders?.[0] ?? data?.order;
+    const order = data?.orders?.[0] as TOrder | undefined;
 
-    if (!order) return rejectWithValue('Заказ не найден');
+    console.log('getOrderByNumberApi raw:', data);
+    console.log('picked order:', order);
+
+    if (!order) {
+      return rejectWithValue(`Заказ number=${number} не найден (orders=[]).`);
+    }
+
     return order;
   } catch (e) {
-    return rejectWithValue(e instanceof Error ? e.message : 'Заказ не найден');
+    return rejectWithValue(
+      e instanceof Error ? e.message : `Ошибка загрузки заказа ${number}`
+    );
   }
 });
 

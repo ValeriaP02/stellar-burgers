@@ -4,14 +4,17 @@ import {
   PayloadAction,
   createSelector
 } from '@reduxjs/toolkit';
+
 import {
   TConstructorIngredient,
   TIngredient,
   TOrderCreateResponse,
   TOrderNumberResponse
 } from '@utils-types';
+
 import { orderBurgerApi } from '@api';
 import { nanoid } from 'nanoid';
+
 import { RootState } from '../../services/store';
 
 interface ConstructorState {
@@ -19,13 +22,15 @@ interface ConstructorState {
   ingredients: TConstructorIngredient[];
   orderRequest: boolean;
   error: string | null;
+  orderModalData: TOrderNumberResponse | null;
 }
 
 const initialState: ConstructorState = {
   bun: null,
   ingredients: [],
   orderRequest: false,
-  error: null
+  error: null,
+  orderModalData: null
 };
 
 export const createOrder = createAsyncThunk<
@@ -47,11 +52,9 @@ export const selectIngredientsCountByType = createSelector(
   [(state: RootState) => state.burgerConstructor.ingredients],
   (ingredients = []) => {
     const map: Record<string, number> = {};
-
     for (const item of ingredients) {
       map[item._id] = (map[item._id] ?? 0) + 1;
     }
-
     return map;
   }
 );
@@ -95,16 +98,19 @@ const constructorSlice = createSlice({
       state.ingredients = [];
       state.orderRequest = false;
       state.error = null;
+      state.orderModalData = null;
     }
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(createOrder.pending, (state) => {
         state.orderRequest = true;
-        state.error = null;
+        state.orderModalData = null;
       })
-      .addCase(createOrder.fulfilled, (state) => {
+      .addCase(createOrder.fulfilled, (state, action) => {
         state.orderRequest = false;
+        state.orderModalData = action.payload;
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.orderRequest = false;
@@ -132,5 +138,8 @@ export const selectOrderRequest = (state: RootState) =>
 
 export const selectConstructorError = (state: RootState) =>
   state.burgerConstructor.error;
+
+export const selectOrderModalData = (state: RootState) =>
+  state.burgerConstructor.orderModalData;
 
 export default constructorSlice.reducer;
