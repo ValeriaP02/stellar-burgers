@@ -1,7 +1,6 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 
-import { AppHeader } from '../app-header/app-header';
 import { ConstructorPage } from '../../pages/constructor-page';
 import { Feed } from '../../pages/feed';
 import { Login } from '../../pages/login';
@@ -12,6 +11,7 @@ import { Profile } from '../../pages/profile';
 import { ProfileOrders } from '../../pages/profile-orders';
 import { NotFound404 } from '../../pages/not-fount-404';
 
+import { AppHeader } from '../app-header/app-header';
 import { Modal } from '../modal';
 import { IngredientDetails } from '../ingredient-details';
 import { OrderInfo } from '../order-info';
@@ -88,6 +88,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Прямой переход на страницу заказа */}
         <Route path='/feed/:number' element={<OrderInfo />} />
         <Route
           path='/profile/orders/:number'
@@ -97,6 +99,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path='/profile/orders'
           element={
@@ -109,6 +112,7 @@ function App() {
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
+      {/* Модальные окна поверх background */}
       {backgroundLocation && (
         <Routes>
           <Route
@@ -119,6 +123,7 @@ function App() {
               </Modal>
             }
           />
+
           <Route
             path='/ingredients/:id'
             element={
@@ -127,6 +132,7 @@ function App() {
               </Modal>
             }
           />
+
           <Route
             path='/profile/orders/:number'
             element={

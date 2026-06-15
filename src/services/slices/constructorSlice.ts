@@ -39,7 +39,8 @@ export const createOrder = createAsyncThunk<
   { rejectValue: string }
 >('constructor/createOrder', async (ingredientIds, { rejectWithValue }) => {
   try {
-    const response: TOrderCreateResponse = await orderBurgerApi(ingredientIds);
+    const response: any = await orderBurgerApi(ingredientIds);
+
     return response.order;
   } catch (e) {
     const message =
@@ -98,7 +99,12 @@ const constructorSlice = createSlice({
       state.ingredients = [];
       state.orderRequest = false;
       state.error = null;
+    },
+
+    clearOrderModalData: (state) => {
       state.orderModalData = null;
+      state.orderRequest = false;
+      state.error = null;
     }
   },
 
@@ -123,7 +129,8 @@ export const {
   addIngredient,
   removeIngredient,
   moveIngredient,
-  clearConstructor
+  clearConstructor,
+  clearOrderModalData
 } = constructorSlice.actions;
 
 export type { ConstructorState };

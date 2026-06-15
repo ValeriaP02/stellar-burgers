@@ -79,6 +79,7 @@ export const createOrder = createAsyncThunk<
 >('orders/create', async (data, { rejectWithValue }) => {
   try {
     const response = await orderBurgerApi(data);
+    console.log('createOrder response:', response);
     return response.order;
   } catch (e) {
     return rejectWithValue(
@@ -89,22 +90,23 @@ export const createOrder = createAsyncThunk<
 
 export const fetchOrderById = createAsyncThunk<
   TOrder,
-  number,
+  string,
   { rejectValue: string }
->('orders/fetchByNumber', async (number, { rejectWithValue }) => {
+>('orders/fetchById', async (number, { rejectWithValue }) => {
   try {
-    const data: any = await getOrderByNumberApi(number);
+    const data: any = await getOrderByNumberApi(Number(number));
 
-    const order = data?.orders?.[0] as TOrder | undefined;
+    console.log('RAW for', number, data);
 
-    console.log('getOrderByNumberApi raw:', data);
-    console.log('picked order:', order);
+    const order = data?.order ?? data?.orders?.[0] ?? data?.data?.[0] ?? data;
 
     if (!order) {
-      return rejectWithValue(`Заказ number=${number} не найден (orders=[]).`);
+      return rejectWithValue(
+        `Заказ number=${number} не найден. Raw keys: ${Object.keys(data || {})}`
+      );
     }
 
-    return order;
+    return order as TOrder;
   } catch (e) {
     return rejectWithValue(
       e instanceof Error ? e.message : `Ошибка загрузки заказа ${number}`

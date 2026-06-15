@@ -21,9 +21,7 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
-    body: JSON.stringify({
-      token: localStorage.getItem('refreshToken')
-    })
+    body: JSON.stringify({ token: getCookie('refreshToken') })
   })
     .then((res) => checkResponse<TRefreshResponse>(res))
     .then((refreshData) => {
@@ -218,7 +216,7 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      uthorization: getCookie('accessToken')
     } as HeadersInit,
     body: JSON.stringify(user)
   });

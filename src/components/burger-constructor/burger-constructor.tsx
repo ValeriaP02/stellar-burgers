@@ -6,13 +6,16 @@ import {
   selectConstructorItems,
   selectOrderRequest,
   createOrder,
-  clearConstructor,
-  selectOrderModalData
+  clearOrderModalData,
+  selectOrderModalData,
+  clearConstructor
 } from '../../services/slices/constructorSlice';
+
 import { selectUser } from '../../services/slices/authSlice';
 
 import { BurgerConstructorUI } from '@ui';
 import { TConstructorIngredient } from '@utils-types';
+import { fetchFeeds } from '../../services/slices/feedSlice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
@@ -38,15 +41,19 @@ export const BurgerConstructor: FC = () => {
       constructorItems.bun._id
     ];
 
-    const result = await dispatch(createOrder(ingredientIds)).unwrap();
-    dispatch(clearConstructor());
-    navigate(`/feed/${result.number}`, { state: { background: location } });
+    try {
+      await dispatch(createOrder(ingredientIds)).unwrap();
+      dispatch(clearConstructor());
+      await dispatch(fetchFeeds()).unwrap();
+    } catch (e) {
+      console.log('createOrder/fetchFeeds error:', e);
+    }
   };
 
   const price = useMemo(() => {
-    const bunPrice = constructorItems.bun ? constructorItems.bun.price * 2 : 0;
+    const bunPrice = constructorItems?.bun ? constructorItems.bun.price * 2 : 0;
 
-    const ingredientsPrice = (constructorItems.ingredients || []).reduce(
+    const ingredientsPrice = (constructorItems?.ingredients || []).reduce(
       (total: number, ingredient: TConstructorIngredient) =>
         total + ingredient.price,
       0
@@ -63,7 +70,7 @@ export const BurgerConstructor: FC = () => {
       orderRequest={orderRequest}
       constructorItems={constructorItems}
       onOrderClick={onOrderClick}
-      closeOrderModal={() => dispatch(clearConstructor())}
+      closeOrderModal={() => dispatch(clearOrderModalData())}
       orderModalData={orderModalData}
     />
   );

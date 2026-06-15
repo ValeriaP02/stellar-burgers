@@ -19,12 +19,6 @@ export const OrderCardUI: FC<OrderCardUIProps> = memo(
       ? `/profile/orders/${orderInfo.number}`
       : `/feed/${orderInfo.number}`;
 
-    console.log('card order', {
-      number: orderInfo.number,
-      _id: orderInfo._id,
-      createdAt: orderInfo.date
-    });
-
     return (
       <Link
         to={to}

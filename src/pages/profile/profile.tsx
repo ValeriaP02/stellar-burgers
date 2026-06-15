@@ -3,6 +3,7 @@ import { ProfileUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import { updateUserApi, getUserApi } from '../../utils/burger-api';
 import { checkUserAuth } from '../../services/slices/authSlice';
+import { getCookie } from '../../utils/cookie';
 
 export const Profile: FC = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ export const Profile: FC = () => {
         email: user.email,
         password: ''
       });
+      setIsFormChanged(false);
     }
   }, [user]);
 
@@ -60,12 +62,13 @@ export const Profile: FC = () => {
       password: formValue.password || undefined
     };
 
+    console.log('accessToken cookie:', getCookie('accessToken'));
+
     try {
       const updatedUser = await updateUserApi(userDataToUpdate);
-      if (updatedUser.success) {
-        setIsFormChanged(false);
-        dispatch(checkUserAuth());
-      }
+
+      setIsFormChanged(false);
+      dispatch(checkUserAuth());
     } catch (error) {
       console.error('Ошибка при обновлении профиля пользователя:', error);
     }

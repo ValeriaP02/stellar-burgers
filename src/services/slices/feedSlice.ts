@@ -22,19 +22,17 @@ const initialState: FeedState = {
 const getErrorMessage = (payload: unknown, fallback: string) =>
   typeof payload === 'string' ? payload : fallback;
 
-export const fetchFeeds = createAsyncThunk<
-  { orders: TOrder[]; total: number; totalToday: number },
-  void,
-  { rejectValue: string }
->('feed/fetchAll', async (_, { rejectWithValue }) => {
-  try {
-    return await getFeedsApi();
-  } catch (e) {
-    return rejectWithValue(
-      e instanceof Error ? e.message : 'Ошибка загрузки ленты'
-    );
+export const fetchFeeds = createAsyncThunk(
+  'feed/fetchFeeds',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await getFeedsApi();
+      return data;
+    } catch (e: any) {
+      return rejectWithValue(e);
+    }
   }
-});
+);
 
 const feedSlice = createSlice({
   name: 'feed',
@@ -48,9 +46,9 @@ const feedSlice = createSlice({
       })
       .addCase(fetchFeeds.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orders = action.payload.orders;
-        state.total = action.payload.total;
-        state.totalToday = action.payload.totalToday;
+        state.orders = action.payload.orders ?? [];
+        state.total = action.payload.total ?? 0;
+        state.totalToday = action.payload.totalToday ?? 0;
       })
       .addCase(fetchFeeds.rejected, (state, action) => {
         state.isLoading = false;

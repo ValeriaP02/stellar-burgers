@@ -1,34 +1,34 @@
-import { FC, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from '../../services/store';
+import React, { FC, useEffect, useMemo } from 'react';
+import { useSelector } from '../../services/store';
 
 import { TOrder } from '@utils-types';
 import { FeedInfoUI } from '../ui/feed-info';
-import { fetchFeeds, selectFeedTotals } from '../../services/slices/feedSlice';
 import {
   selectFeedOrders,
-  selectFeedLoading
+  selectFeedTotals
 } from '../../services/slices/feedSlice';
 
-const getOrders = (orders: TOrder[], status: string): number[] =>
-  orders
-    .filter((item) => item.status === status)
-    .map((item) => item.number)
-    .slice(0, 20);
+const sliceTop = (arr: number[]) => arr.slice(0, 20);
+
+const ordersToNumbers = (orders: TOrder[]) => orders.map((o) => o.number);
 
 export const FeedInfo: FC = () => {
-  const dispatch = useDispatch();
-
   const orders = useSelector(selectFeedOrders);
-  const loading = useSelector(selectFeedLoading);
   const { total, totalToday } = useSelector(selectFeedTotals);
 
+  const readyOrders = useMemo(() => {
+    const ready = orders.filter((o) => o.status === 'done');
+    return sliceTop(ordersToNumbers(ready));
+  }, [orders]);
+
+  const pendingOrders = useMemo(() => {
+    const notDone = orders.filter((o) => o.status !== 'done');
+    return sliceTop(ordersToNumbers(notDone));
+  }, [orders]);
+
   useEffect(() => {
-    if (!orders.length && !loading) dispatch(fetchFeeds());
-  }, [dispatch, orders.length, loading]);
-
-  const readyOrders = useMemo(() => getOrders(orders, 'done'), [orders]);
-
-  const pendingOrders = useMemo(() => getOrders(orders, 'pending'), [orders]);
+    console.log('feed orders', orders);
+  }, [orders]);
 
   return (
     <FeedInfoUI
@@ -38,3 +38,5 @@ export const FeedInfo: FC = () => {
     />
   );
 };
+
+export default FeedInfo;

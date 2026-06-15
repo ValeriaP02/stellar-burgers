@@ -9,6 +9,7 @@ import {
   resetPasswordApi
 } from '../../utils/burger-api';
 import { TUser } from '../../utils/types';
+import { setCookie } from '../../utils/cookie';
 
 interface AuthState {
   user: TUser | null;
@@ -33,8 +34,8 @@ export const registerUser = createAsyncThunk<
 >('auth/register', async (data, { rejectWithValue }) => {
   try {
     const response = await registerUserApi(data);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('accessToken', response.accessToken);
+    setCookie('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
     return response.user;
   } catch (error) {
     return rejectWithValue(
@@ -50,8 +51,8 @@ export const loginUser = createAsyncThunk<
 >('auth/login', async (data, { rejectWithValue }) => {
   try {
     const response = await loginUserApi(data);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('accessToken', response.accessToken);
+    setCookie('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
     return response.user;
   } catch (error) {
     return rejectWithValue(

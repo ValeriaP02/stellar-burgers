@@ -13,15 +13,15 @@ import { useParams } from 'react-router-dom';
 import { selectIngredients } from '../../services/slices/ingredientsSlice';
 
 export const OrderInfo: FC = () => {
-  const { number } = useParams();
   const dispatch = useDispatch();
+  const { number } = useParams<{ number: string }>();
+  console.log('route param id=', number);
 
   const orderData = useSelector(selectCurrentOrder);
   const ingredients = useSelector(selectIngredients);
 
   useEffect(() => {
-    if (!number) return;
-    dispatch(fetchOrderById(Number(number)));
+    if (number) dispatch(fetchOrderById(number));
   }, [dispatch, number]);
 
   const orderInfo = useMemo(() => {
@@ -55,6 +55,12 @@ export const OrderInfo: FC = () => {
   }, [orderData, ingredients]);
 
   if (!orderInfo) return <Preloader />;
+  console.log(
+    'fetching order by number =',
+    number,
+    'as Number =',
+    Number(number)
+  );
 
   return <OrderInfoUI orderInfo={orderInfo} />;
 };
