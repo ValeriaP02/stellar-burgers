@@ -62,15 +62,12 @@ export const Profile: FC = () => {
       password: formValue.password || undefined
     };
 
-    console.log('accessToken cookie:', getCookie('accessToken'));
-
     try {
-      const updatedUser = await updateUserApi(userDataToUpdate);
-
+      await updateUserApi(userDataToUpdate);
       setIsFormChanged(false);
       dispatch(checkUserAuth());
-    } catch (error) {
-      console.error('Ошибка при обновлении профиля пользователя:', error);
+    } catch (error: any) {
+      console.error('Ошибка при обновлении:', error);
     }
   };
 

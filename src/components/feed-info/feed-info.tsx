@@ -22,12 +22,16 @@ export const FeedInfo: FC = () => {
   }, [orders]);
 
   const pendingOrders = useMemo(() => {
-    const notDone = orders.filter((o) => o.status !== 'done');
-    return sliceTop(ordersToNumbers(notDone));
+    const pending = orders.filter((o) => o.status === 'pending');
+    return sliceTop(ordersToNumbers(pending));
   }, [orders]);
 
   useEffect(() => {
-    console.log('feed orders', orders);
+    if (!orders.length) return;
+    console.log(
+      'feed status samples:',
+      orders.slice(0, 10).map((o) => o.status)
+    );
   }, [orders]);
 
   return (

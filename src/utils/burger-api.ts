@@ -216,7 +216,7 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      uthorization: getCookie('accessToken')
+      authorization: getCookie('accessToken')
     } as HeadersInit,
     body: JSON.stringify(user)
   });
