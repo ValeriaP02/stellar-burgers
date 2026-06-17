@@ -66,11 +66,9 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   async (_, { rejectWithValue }) => {
     try {
       await logoutApi();
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('accessToken');
-    } catch (error) {
+    } catch (e) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Ошибка при выходе'
+        e instanceof Error ? e.message : 'Ошибка при выходе'
       );
     }
   }
@@ -161,6 +159,9 @@ export const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.isAuthChecked = true;
+        state.isAuthenticated = false;
+        state.user = null;
         state.error = action.payload ?? 'Не удалось войти';
       })
 
@@ -180,14 +181,20 @@ export const authSlice = createSlice({
 
       .addCase(logoutUser.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLoading = false;
+        state.isAuthChecked = true;
         state.isAuthenticated = false;
         state.user = null;
+        state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.isAuthChecked = true;
+        state.isAuthenticated = false;
+        state.user = null;
         state.error = action.payload ?? 'Не удалось выйти';
       })
 
@@ -256,5 +263,7 @@ export const selectUser = (state: { auth: AuthState }) => state.auth.user;
 
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
   state.auth.isAuthenticated;
+
+export const selectError = (state: any) => state.auth.error;
 
 export default authSlice.reducer;

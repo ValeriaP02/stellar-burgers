@@ -21,7 +21,9 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
-    body: JSON.stringify({ token: getCookie('refreshToken') })
+    body: JSON.stringify({
+      token: localStorage.getItem('refreshToken')
+    })
   })
     .then((res) => checkResponse<TRefreshResponse>(res))
     .then((refreshData) => {
@@ -224,10 +226,8 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
 export const logoutApi = () =>
   fetch(`${URL}/auth/logout`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
-    },
-    body: JSON.stringify({
-      token: localStorage.getItem('refreshToken')
-    })
+    }
   }).then((res) => checkResponse<TServerResponse<{}>>(res));
