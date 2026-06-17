@@ -264,6 +264,9 @@ export const selectUser = (state: { auth: AuthState }) => state.auth.user;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
   state.auth.isAuthenticated;
 
+export const selectIsAuthChecked = (state: { auth: AuthState }) =>
+  state.auth.isAuthChecked;
+
 export const selectError = (state: any) => state.auth.error;
 
 export default authSlice.reducer;

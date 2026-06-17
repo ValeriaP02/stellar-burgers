@@ -1,7 +1,7 @@
 import { getCookie, setCookie } from './cookie';
 import { TIngredient, TOrder, TUser } from './types';
 
-const URL = process.env.BURGER_API_URL;
+const URL = 'https://norma.education-services.ru/api';
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -226,8 +226,10 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
 export const logoutApi = () =>
   fetch(`${URL}/auth/logout`, {
     method: 'POST',
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
-    }
+    },
+    body: JSON.stringify({
+      token: getCookie('refreshToken')
+    })
   }).then((res) => checkResponse<TServerResponse<{}>>(res));
