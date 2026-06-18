@@ -34,8 +34,8 @@ export const registerUser = createAsyncThunk<
 >('auth/register', async (data, { rejectWithValue }) => {
   try {
     const response = await registerUserApi(data);
-    setCookie('refreshToken', response.refreshToken);
-    setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('accessToken', response.accessToken);
     return response.user;
   } catch (error) {
     return rejectWithValue(
@@ -51,8 +51,8 @@ export const loginUser = createAsyncThunk<
 >('auth/login', async (data, { rejectWithValue }) => {
   try {
     const response = await loginUserApi(data);
-    setCookie('refreshToken', response.refreshToken);
-    setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('accessToken', response.accessToken);
     return response.user;
   } catch (error) {
     return rejectWithValue(
@@ -189,6 +189,9 @@ export const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.error = null;
+
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessToken');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -196,6 +199,9 @@ export const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload ?? 'Не удалось выйти';
+
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessToken');
       })
 
       .addCase(checkUserAuth.pending, (state) => {
