@@ -1,3 +1,4 @@
+import { getCookie, setCookie } from './cookie';
 import { TIngredient, TOrder, TUser } from './types';
 
 const URL = 'https://norma.education-services.ru/api';
@@ -31,7 +32,7 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
       }
 
       localStorage.setItem('refreshToken', refreshData.refreshToken);
-      localStorage.setItem('accessToken', refreshData.accessToken);
+      setCookie('accessToken', refreshData.accessToken);
 
       return refreshData;
     });
@@ -95,7 +96,7 @@ export const getOrdersApi = () =>
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: localStorage.getItem('accessToken') || ''
+      authorization: getCookie('accessToken')
     } as HeadersInit
   }).then((data) => {
     if (data?.success) return data.orders;
@@ -112,7 +113,7 @@ export const orderBurgerApi = (data: string[]) =>
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: localStorage.getItem('accessToken') || ''
+      authorization: getCookie('accessToken')
     } as HeadersInit,
     body: JSON.stringify({ ingredients: data })
   }).then((data) => {
@@ -125,12 +126,13 @@ export type TOrderResponse = TServerResponse<{
 }>;
 
 export const getOrderByNumberApi = (number: number) =>
-  fetch(`${URL}/orders/${number}`, {
+  fetchWithRefresh<TOrderResponse>(`${URL}/orders/${number}`, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then((res) => checkResponse<TOrderResponse>(res));
+      'Content-Type': 'application/json;charset=utf-8',
+      authorization: getCookie('accessToken')
+    } as HeadersInit
+  });
 
 export type TRegisterData = {
   email: string;
@@ -210,7 +212,7 @@ export type TUserResponse = TServerResponse<{ user: TUser }>;
 export const getUserApi = () =>
   fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     headers: {
-      authorization: localStorage.getItem('accessToken') || ''
+      authorization: getCookie('accessToken')
     } as HeadersInit
   });
 
@@ -219,7 +221,7 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: localStorage.getItem('accessToken') || ''
+      authorization: getCookie('accessToken')
     } as HeadersInit,
     body: JSON.stringify(user)
   });
