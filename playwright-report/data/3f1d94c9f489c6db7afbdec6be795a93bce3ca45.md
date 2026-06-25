@@ -1,0 +1,149 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: constructor.test.tsx >> Burger constructor >> Процесс создания заказа: номер заказа + очистка конструктора
+- Location: src\tests\constructor.test.tsx:151:7
+
+# Error details
+
+```
+Error: page.goto: net::ERR_FAILED at http://localhost:4000/
+Call log:
+  - navigating to "http://localhost:4000/", waiting until "domcontentloaded"
+
+```
+
+# Test source
+
+```ts
+  54  | 
+  55  |   throw new Error(`Не удалось извлечь number заказа из ${ordersHarPath}`);
+  56  | }
+  57  | 
+  58  | test.describe('Burger constructor', () => {
+  59  |   const accessTokenFake = 'fake_access_token';
+  60  |   const refreshTokenFake = 'fake_refresh_token';
+  61  | 
+  62  |   const expectedOrderNumber = readOrderNumberFromHar(ORDERS_HAR);
+  63  | 
+  64  |   test.beforeEach(async ({ page, context }) => {
+  65  |     // Токены
+  66  |     await page.addInitScript(
+  67  |       ({ accessToken, refreshToken }) => {
+  68  |         window.localStorage.setItem('refreshToken', refreshToken);
+  69  |         // на фронте accessToken может читаться из cookie, но пусть будет и localStorage
+  70  |         window.localStorage.setItem('accessToken', accessToken);
+  71  |       },
+  72  |       { accessToken: accessTokenFake, refreshToken: refreshTokenFake }
+  73  |     );
+  74  | 
+  75  |     // cookie для getCookie('accessToken')
+  76  |     // domain поставь тем же, что в baseURL playwright.config.ts
+  77  |     await context.addCookies([
+  78  |       {
+  79  |         name: 'accessToken',
+  80  |         value: accessTokenFake,
+  81  |         domain: 'localhost', // если baseURL у тебя не localhost — поменяй
+  82  |         path: '/'
+  83  |       }
+  84  |     ]);
+  85  | 
+  86  |     await page.routeFromHAR(INGREDIENTS_HAR);
+  87  |     await page.routeFromHAR(ORDERS_HAR);
+  88  |   });
+  89  | 
+  90  |   test('Добавление ингредиента из списка ингредиентов в конструктор', async ({
+  91  |     page
+  92  |   }) => {
+  93  |     await page.goto('http://localhost:4000/', {
+  94  |       waitUntil: 'domcontentloaded'
+  95  |     });
+  96  | 
+  97  |     const cards = page.locator(SELECT.ingredientCard);
+  98  |     await expect(cards.first()).toBeVisible();
+  99  | 
+  100 |     const before = await page.locator(SELECT.constructorItem).count();
+  101 |     await cards.first().locator(SELECT.ingredientAdd).click();
+  102 | 
+  103 |     await expect(page.locator(SELECT.constructorItem)).toHaveCount(before + 1);
+  104 |   });
+  105 | 
+  106 |   test('Открытие и закрытие модального окна с описанием ингредиента', async ({
+  107 |     page
+  108 |   }) => {
+  109 |     await page.goto('http://localhost:4000/', {
+  110 |       waitUntil: 'domcontentloaded'
+  111 |     });
+  112 | 
+  113 |     const cards = page.locator(SELECT.ingredientCard);
+  114 |     await expect(cards.first()).toBeVisible();
+  115 | 
+  116 |     await cards.first().click();
+  117 |     await expect(page.locator(SELECT.ingredientModal)).toBeVisible();
+  118 | 
+  119 |     await page.locator(SELECT.ingredientModalClose).click();
+  120 |     await expect(page.locator(SELECT.ingredientModal)).toBeHidden();
+  121 |   });
+  122 | 
+  123 |   test('Отображение данных именно того ингредиента, по которому произошел клик', async ({
+  124 |     page
+  125 |   }) => {
+  126 |     await page.goto('http://localhost:4000/', {
+  127 |       waitUntil: 'domcontentloaded'
+  128 |     });
+  129 | 
+  130 |     const cards = page.locator(SELECT.ingredientCard);
+  131 |     await expect(cards.first()).toBeVisible();
+  132 | 
+  133 |     const count = await cards.count();
+  134 |     expect(count).toBeGreaterThan(1);
+  135 | 
+  136 |     const target = cards.nth(1);
+  137 | 
+  138 |     const expectedName = (
+  139 |       await target.locator(SELECT.ingredientName).first().textContent()
+  140 |     )?.trim();
+  141 | 
+  142 |     await target.click();
+  143 |     await expect(page.locator(SELECT.ingredientModal)).toBeVisible();
+  144 | 
+  145 |     const actualName = (
+  146 |       await page.locator(SELECT.ingredientModalTitle).first().textContent()
+  147 |     )?.trim();
+  148 |     expect(actualName).toBe(expectedName);
+  149 |   });
+  150 | 
+  151 |   test('Процесс создания заказа: номер заказа + очистка конструктора', async ({
+  152 |     page
+  153 |   }) => {
+> 154 |     await page.goto('http://localhost:4000/', {
+      |                ^ Error: page.goto: net::ERR_FAILED at http://localhost:4000/
+  155 |       waitUntil: 'domcontentloaded'
+  156 |     });
+  157 | 
+  158 |     const cards = page.locator(SELECT.ingredientCard);
+  159 |     await expect(cards.first()).toBeVisible();
+  160 | 
+  161 |     await cards.first().locator(SELECT.ingredientAdd).click();
+  162 |     await cards.nth(1).locator(SELECT.ingredientAdd).click();
+  163 | 
+  164 |     const itemCount = await page.locator(SELECT.constructorItem).count();
+  165 |     expect(itemCount).toBeGreaterThan(0);
+  166 | 
+  167 |     await page.locator(SELECT.checkoutButton).click();
+  168 | 
+  169 |     await expect(page.locator(SELECT.orderModal)).toBeVisible();
+  170 |     await expect(page.locator(SELECT.orderNumber)).toHaveText(
+  171 |       String(expectedOrderNumber)
+  172 |     );
+  173 | 
+  174 |     await expect(page.locator(SELECT.constructorItem)).toHaveCount(0);
+  175 |   });
+  176 | });
+  177 | 
+```
