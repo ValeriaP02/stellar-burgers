@@ -21,13 +21,11 @@ export const ProtectedRoute = ({
 
   if (!isAuthChecked) return null;
 
-  // только неавторизованные
   if (onlyUnAuth && isAuthenticated) {
     const from = (location.state as any)?.from?.pathname || '/';
     return <Navigate to={from} replace />;
   }
 
-  // только авторизованные
   if (!onlyUnAuth && !isAuthenticated) {
     return (
       <Navigate

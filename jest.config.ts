@@ -3,9 +3,38 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type {Config} from 'jest';
+import type { Config } from 'jest';
 
 const config: Config = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+
+  testMatch: [
+    '**/__tests__/**/*.test.ts',
+    '**/__tests__/**/*.test.tsx',
+    '**/?(*.)+(test).ts',
+    '**/?(*.)+(test).tsx'
+  ],
+
+  transform: {
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json'
+      },
+    ],
+  },
+
+  moduleNameMapper: {
+    '^@pages$': '<rootDir>/src/pages',
+    '^@components$': '<rootDir>/src/components',
+    '^@ui$': '<rootDir>/src/components/ui',
+    '^@ui-pages$': '<rootDir>/src/components/ui/pages',
+    '^@utils-types$': '<rootDir>/src/utils/types',
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@slices$': '<rootDir>/src/services/slices',
+    '^@selectors$': '<rootDir>/src/services/selectors',
+  },
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
