@@ -17,8 +17,8 @@ export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
         className={styles.container}
         data-cy='ingredient-card'
         data-cy-type={type}
-        data-cy-bun-label={type === 'bun' ? 'bun' : undefined}
-        data-cy-filling-label={type !== 'bun' ? 'filling' : undefined}
+        data-cy-bun-label={type === 'bun' ? 'bun-label' : undefined}
+        data-cy-filling-label={type !== 'bun' ? 'filling-label' : undefined}
       >
         <Link
           className={styles.article}

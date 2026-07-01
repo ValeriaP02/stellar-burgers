@@ -69,35 +69,8 @@ test.describe('Конструктор бургера', () => {
   const ingredientsData = getIngredientsFromHar(INGREDIENTS_HAR);
 
   test.beforeEach(async ({ page, context }) => {
-    await page.route('**/api/ingredients**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({ success: true, data: ingredientsData }),
-        contentType: 'application/json'
-      });
-    });
-
-    await page.route('**/api/orders**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          order: { number: expectedOrderNumber }
-        }),
-        contentType: 'application/json'
-      });
-    });
-
-    await page.route('**/api/auth/user**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          user: { email: 'test@test.com', name: 'TestUser' }
-        }),
-        contentType: 'application/json'
-      });
-    });
+    await page.routeFromHAR(INGREDIENTS_HAR);
+    await page.routeFromHAR(ORDERS_HAR);
 
     await context.addCookies([
       {
@@ -116,14 +89,16 @@ test.describe('Конструктор бургера', () => {
       { accessToken: accessTokenFake, refreshToken: refreshTokenFake }
     );
 
+    console.log('Пытаюсь открыть страницу...');
     await page.goto('http://localhost:4000', {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
+      waitUntil: 'load',
+      timeout: 60000
     });
+    console.log('Страница открыта');
 
     await page.waitForSelector('[data-cy="ingredient-card"]', {
       state: 'visible',
-      timeout: 10000
+      timeout: 30000
     });
 
     console.log('Страница загружена, ингредиенты отображаются');
